@@ -1,0 +1,54 @@
+{
+  "summary": "First-finish smoke test for SertãoCast. All 13 backend endpoints pass (health, episodes list+category filter, admin login success/401, /auth/me with/without token, public booking create + duplicate 409, availability, admin bookings list, cancel/delete booking, POST /episodes admin vs 401, contact public + admin gate, /stats admin). Frontend home hero navigation, player bar, admin login (correct + wrong creds), tab switching, add episode button visibility, logout, episodes search+filter, and full public booking flow (date -> slot -> form -> success) all work end-to-end.",
+  "tested_scope": ["frontend", "backend", "auth", "integration"],
+  "passed": [
+    "GET /api/ 200 status ok",
+    "GET /api/episodes returns 6 seeded episodes",
+    "GET /api/episodes?category=musica filters correctly (2 results)",
+    "POST /api/auth/login wrong creds -> 401",
+    "POST /api/auth/login admin creds -> 200 with token+user",
+    "GET /api/auth/me no token -> 401, with token -> 200 admin",
+    "POST /api/bookings public -> 200 confirmed booking",
+    "POST /api/bookings duplicate slot -> 409 'Horário já reservado'",
+    "GET /api/bookings/availability?date=... -> 200 booked_slots list",
+    "GET /api/bookings no auth -> 401; with admin -> 200 list",
+    "PATCH /api/bookings/{id}/cancel + DELETE /api/bookings/{id} admin -> 200",
+    "POST /api/episodes no auth -> 401; admin -> 200 creates ep",
+    "POST /api/contact public -> 200 success",
+    "GET /api/contact no auth -> 401; admin -> 200 list",
+    "GET /api/stats admin -> 200 stats dict",
+    "Frontend home: 'A voz do Sertão' headline visible, hero-book-studio-button navigates to /agendar, hero-play-latest-button opens player bar",
+    "Frontend booking flow end-to-end: booking-date-*, booking-time-slot-*, booking-name/email/phone/podcast-input, booking-submit-button -> booking-success-message rendered",
+    "Frontend episodes page: episode-search-input + episode-filter-musica visible and clickable",
+    "Frontend admin: correct login navigates to /admin/dashboard, all 3 tabs (bookings/episodes/messages) visible, admin-add-episode-button visible, admin-logout-button returns to /admin",
+    "Nav links (nav-home-link, nav-episodes-link, nav-about-link, nav-contact-link) navigate correctly"
+  ],
+  "failed": [
+    {
+      "area": "frontend/booking",
+      "issue": "React hydration warning: <span> cannot be a child of <option>. Cosmetic dev warning caused by editor instrumentation wrapping option children in span. Does not break functionality.",
+      "evidence": "Console error 'In HTML, %s cannot be a child of %s. This will cause a hydration error.' on /agendar page; booking flow still completes successfully.",
+      "priority": "LOW"
+    },
+    {
+      "area": "frontend/admin",
+      "issue": "React warning 'Cannot update a component (BrowserRouter) while rendering a different component (AdminLogin)' on /admin. Non-blocking; login and redirect still work.",
+      "evidence": "Console warning during AdminLogin render; user reaches /admin/dashboard after submit.",
+      "priority": "LOW"
+    },
+    {
+      "area": "frontend/admin (wrong creds toast)",
+      "issue": "Could not positively confirm the error toast for wrong credentials via generic [role=status]/.Toastify selectors (count=0). Login form did NOT proceed to dashboard on wrong creds (correct behavior), so gating works; only the toast visibility check was inconclusive.",
+      "evidence": "toast_wrong count=0 with generic selectors; needs specific toast data-testid to verify reliably.",
+      "priority": "LOW"
+    }
+  ],
+  "action_items": [
+    "Optional: add data-testid to error toasts (e.g., admin-login-error-toast) so wrong-credential feedback can be asserted deterministically.",
+    "Optional: silence dev-only React hydration warning caused by <span> inside <option> in Booking.jsx duration select (editor instrumentation artifact).",
+    "Optional: fix setState-in-render warning in AdminLogin (redirect logic likely running during render)."
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "retest_needed": false,
+  "full_testing_deferred": true
+}

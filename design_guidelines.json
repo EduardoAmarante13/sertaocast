@@ -1,0 +1,112 @@
+{
+  "project_name": "SertãoCast - Podcast & Studio Booking Platform",
+  "theme": "Dark Sertão Cyberpunk / Modern Streaming",
+  "archetype": "ARCHETYPE 7: ELECTRIC & NEON x NORTHEASTERN SERTÃO CULTURA",
+  "brand_identity": {
+    "name": "SertãoCast",
+    "tagline": "A voz do Sertão na velocidade do streaming",
+    "logo_concept": "Cactus-themed podcast microphone with neon green (#4ade80) speech bubble vibe on deep obsidian background.",
+    "vibe": "Energetic, cultural, bold, modern, authentic Northeastern Brazilian soul meets high-tech podcast studio."
+  },
+  "colors": {
+    "background": {
+      "primary": "#070A07",
+      "secondary": "#0E140F",
+      "surface": "#141C15",
+      "surface_hover": "#1C271E",
+      "glass": "rgba(20, 28, 21, 0.75)",
+      "card_dark": "#0B100C"
+    },
+    "neon_accents": {
+      "lime_green": "#4ade80",
+      "lime_green_glow": "rgba(74, 222, 128, 0.35)",
+      "electric_lime": "#39FF14",
+      "cyan_teal": "#06b6d4",
+      "cyan_glow": "rgba(6, 182, 212, 0.3)",
+      "amber_warmth": "#f59e0b"
+    },
+    "text": {
+      "primary": "#F0FDF4",
+      "secondary": "#A7F3D0",
+      "muted": "#6EE7B7",
+      "subtle": "#34D399",
+      "dark_contrast": "#052e16"
+    },
+    "borders": {
+      "default": "rgba(74, 222, 128, 0.2)",
+      "hover": "rgba(74, 222, 128, 0.5)",
+      "cyan": "rgba(6, 182, 212, 0.3)"
+    }
+  },
+  "typography": {
+    "heading_font": "Unbounded, Outfit, sans-serif",
+    "body_font": "Plus Jakarta Sans, Inter, sans-serif",
+    "mono_font": "JetBrains Mono, monospace",
+    "h1": "text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight",
+    "h2": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight",
+    "h3": "text-xl sm:text-2xl font-semibold",
+    "card_title": "text-lg sm:text-xl font-bold"
+  },
+  "layout_and_grid": {
+    "container_padding": "px-4 sm:px-8 lg:px-12 py-8 lg:py-16",
+    "hero_layout": "Asymmetric Bento Grid with Neon Glow microphone visual, live audio visualizer widget, quick stats, and primary booking CTA.",
+    "episodes_grid": "3-column responsive bento cards with neon hover outline, play button overlay, duration badge, and category tags.",
+    "booking_layout": "Step-by-step interactive studio reservation flow: 1. Date & Time Selection, 2. Studio Spec / Equipment Add-ons, 3. User & Podcast Info, 4. Auto-Approval Confirmation Screen.",
+    "admin_layout": "High-density command center dark dashboard with sidebar navigation, metric cards, interactive bookings table, and episode manager modal."
+  },
+  "components_to_build": {
+    "Navbar": "Sticky header with glassmorphism blur (backdrop-blur-xl bg-[#070A07]/80), glowing SertãoCast logo badge, nav links (Home, Episódios, Sobre, Agendar Sala, Contato, Admin), live 'AO VIVO / NO AR' neon pulse tag, and 'Agendar Agora' button.",
+    "HeroSection": "Dynamic headline 'Cultura, Humor, Música & Conversa Sem Filtro', interactive mini-player audio widget, CTA buttons with glowing borders, and cactus-mic background graphics.",
+    "AudioPlayerBar": "Sticky or expandable floating bottom audio player with play/pause, scrub bar, volume, speed control, episode cover thumbnail, and audio visualization bars.",
+    "EpisodeCard": "Card with category tag (Cultura, Música, Humor, Entrevistas), host tags, play count, release date, quick-listen play button, and share modal.",
+    "BookingCalendar": "Interactive visual calendar picker for selecting studio dates and time slots (08:00 to 22:00), equipment options (Røde mics, 4K cameras, multi-track mixing, video podcast lighting), price calculation, and instant auto-approval simulation.",
+    "AdminDashboard": "Protected/simulated admin panel with login screen, tabs for 'Agendamentos' (approve, cancel, filter by date), 'Episódios' (create new episode, upload thumbnail, edit title/description/audio link), and 'Métricas' (total streams, booked hours, estimated revenue).",
+    "AboutSection": "Sertão identity narrative, host profile spotlight cards, studio photos gallery, and hardware setup list (Microfones Shure SM7B, Câmeras Sony Alpha, Mesa Rødecaster Pro II).",
+    "ContactForm": "Form with neon validation states, dynamic topic selector, interactive FAQ accordion, and WhatsApp/Instagram quick links."
+  },
+  "image_urls": {
+    "studio_mics": "https://images.unsplash.com/photo-1615458317538-72c46d9359d8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwyfHxwb2RjYXN0JTIwc3R1ZGlvJTIwbWljcm9waG9uZSUyMG5lb24lMjBuZW9uJTIwZ3JlZW4lMjBsaWdodGluZyUyMHJhZGlvJTIwYnJvYWRjYXN0JTIwaG9zdCUyMG1pY3JvcGhvbmV8ZW58MHx8fHwxNzg4OTc4MzcxfDA&ixlib=rb-4.1.0&q=85",
+    "studio_control_room": "https://images.unsplash.com/photo-1615458317303-4bb49df432cc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHszfHxwb2RjYXN0JTIwc3R1ZGlvJTIwbWljcm9waG9uZSUyMG5lb24lMjBuZW9uJTIwZ3JlZW4lMjBsaWdodGluZyUyMHJhZGlvJTIwYnJvYWRjYXN0JTIwaG9zdCUyMG1pY3JvcGhvbmV8ZW58MHx8fHwxNzg4OTc4MzcxfDA&ixlib=rb-4.1.0&q=85",
+    "studio_desk": "https://images.unsplash.com/photo-1668537338628-85b9970bf17f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwxfHxwb2RjYXN0JTIwc3R1ZGlvJTIwbWljcm9waG9uZSUyMG5lb24lMjBuZW9uJTIwZ3JlZW4lMjBsaWdodGluZyUyMHJhZGlvJTIwYnJvYWRjYXN0JTIwaG9zdCUyMG1pY3JvcGhvbmV8ZW58MHx8fHwxNzg4OTc4MzcxfDA&ixlib=rb-4.1.0&q=85",
+    "mic_red_glow": "https://images.unsplash.com/photo-1633933757597-2d09c360c2ad?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHszfHxwb2RjYXN0JTIwaG9zdCUyMHJlY29yZGluZyUyMG1pY3JvcGhvbmUlMjBzdHVkaW8lMjBuZW9ufGVufDB8fHx8MTc4ODk3ODM3OXww&ixlib=rb-4.1.0&q=85",
+    "mic_silver": "https://images.unsplash.com/photo-1659083726032-32d67d08ba64?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHw0fHxwb2RjYXN0JTIwaG9zdCUyMHJlY29yZGluZyUyMG1pY3JvcGhvbmUlMjBzdHVkaW8lMjBuZW9ufGVufDB8fHx8MTc4ODk3ODM3OXww&ixlib=rb-4.1.0&q=85",
+    "neon_cactus_vibe": "https://images.unsplash.com/photo-1678640386878-e5bf984d00da?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHw0fHxjYWN0dXMlMjBwbGFudCUyMGRlc2VydCUyMGRhcmslMjBsaWdodGluZyUyMG5lb258ZW58MHx8fHwxNzg4OTc4Mzc5fDA&ixlib=rb-4.1.0&q=85",
+    "sertao_cactus_dark": "https://images.unsplash.com/photo-1622550068931-b017a15dacad?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwzfHxjYWN0dXMlMjBwbGFudCUyMGRlc2VydCUyMGRhcmslMjBsaWdodGluZyUyMG5lb258ZW58MHx8fHwxNzg4OTc4Mzc5fDA&ixlib=rb-4.1.0&q=85"
+  },
+  "data_testid_rules": {
+    "requirement": "ALL interactive components, buttons, form inputs, audio controls, tab buttons, admin actions, and calendar slots MUST include clear data-testid attributes.",
+    "examples": [
+      "data-testid=\"nav-home-link\"",
+      "data-testid=\"nav-episodes-link\"",
+      "data-testid=\"nav-about-link\"",
+      "data-testid=\"nav-booking-link\"",
+      "data-testid=\"nav-contact-link\"",
+      "data-testid=\"nav-admin-link\"",
+      "data-testid=\"hero-book-studio-button\"",
+      "data-testid=\"hero-play-latest-button\"",
+      "data-testid=\"episode-play-button-1\"",
+      "data-testid=\"episode-filter-cultura\"",
+      "data-testid=\"episode-filter-humor\"",
+      "data-testid=\"episode-search-input\"",
+      "data-testid=\"booking-date-picker\"",
+      "data-testid=\"booking-time-slot-1000\"",
+      "data-testid=\"booking-submit-button\"",
+      "data-testid=\"booking-success-message\"",
+      "data-testid=\"admin-login-email-input\"",
+      "data-testid=\"admin-login-password-input\"",
+      "data-testid=\"admin-login-submit-button\"",
+      "data-testid=\"admin-tab-bookings\"",
+      "data-testid=\"admin-tab-episodes\"",
+      "data-testid=\"admin-approve-booking-button\"",
+      "data-testid=\"admin-add-episode-button\""
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Build a complete hybrid web application for SertãoCast in Portuguese (PT-BR).",
+    "Ensure the visual tone perfectly reflects Sertão + Cyberpunk Streaming: Deep dark background (#070A07) with glowing neon green (#4ade80) and cyan (#06b6d4) accents.",
+    "Include full navigation routing or tab views for: Home, Episódios, Sobre, Agendar Sala, Contato, Admin Login & Admin Dashboard.",
+    "Provide interactive features: Audio player bar with live episode playback simulation, audio wave visualization, booking calendar with time slots and instant approval confirmation, filters and search for episodes, and full admin management controls.",
+    "Use Lucide-react icons, Framer Motion for neon glow transitions, and Sonner for toast notifications.",
+    "Make sure every interactive element contains the required data-testid attributes."
+  ]
+}
