@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, Newspaper, Calendar } from "lucide-react";
 import { api } from "../lib/api";
+import AdSlot from "../components/AdSlot";
 
 const CATS = [
   { id: "todos", label: "Todas" },
@@ -56,54 +57,114 @@ export default function News() {
           <p className="text-sm text-[#6EE7B7]">Logo logo o admin publica a primeira matéria.</p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((n) => (
-            <article
-              key={n.id}
-              data-testid={`news-card-${n.id}`}
-              className="grain-card neon-border rounded-2xl overflow-hidden group flex flex-col"
-            >
-              <div className="relative aspect-[16/10] bg-[#0B100C] overflow-hidden">
-                {n.image_url ? (
-                  <img src={n.image_url} alt={n.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Newspaper className="w-10 h-10 text-[#4ade80]/40" />
+        <>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {items.slice(0, 3).map((n) => (
+              <article
+                key={n.id}
+                data-testid={`news-card-${n.id}`}
+                className="grain-card neon-border rounded-2xl overflow-hidden group flex flex-col"
+              >
+                <div className="relative aspect-[16/10] bg-[#0B100C] overflow-hidden">
+                  {n.image_url ? (
+                    <img src={n.image_url} alt={n.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Newspaper className="w-10 h-10 text-[#4ade80]/40" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#070A07] via-transparent to-transparent" />
+                  <span className="absolute top-3 left-3 font-mono text-[10px] px-2 py-1 rounded-md bg-[rgba(74,222,128,0.15)] text-[#4ade80] border border-[rgba(74,222,128,0.3)] uppercase tracking-wider">
+                    {n.category}
+                  </span>
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#6EE7B7] mb-3">
+                    <Calendar className="w-3 h-3" />
+                    {new Date(n.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                    {n.source_name && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-[#6EE7B7]" />
+                        <span>{n.source_name}</span>
+                      </>
+                    )}
                   </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070A07] via-transparent to-transparent" />
-                <span className="absolute top-3 left-3 font-mono text-[10px] px-2 py-1 rounded-md bg-[rgba(74,222,128,0.15)] text-[#4ade80] border border-[rgba(74,222,128,0.3)] uppercase tracking-wider">
-                  {n.category}
-                </span>
-              </div>
-              <div className="p-5 flex-1 flex flex-col">
-                <div className="flex items-center gap-2 text-xs font-mono text-[#6EE7B7] mb-3">
-                  <Calendar className="w-3 h-3" />
-                  {new Date(n.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
-                  {n.source_name && (
-                    <>
-                      <span className="w-1 h-1 rounded-full bg-[#6EE7B7]" />
-                      <span>{n.source_name}</span>
-                    </>
+                  <h3 className="font-display font-bold text-white text-lg leading-tight mb-2">{n.title}</h3>
+                  <p className="text-sm text-[#A7F3D0]/80 leading-relaxed line-clamp-3 flex-1">{n.summary}</p>
+                  {n.source_url && (
+                    <a
+                      href={n.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid={`news-link-${n.id}`}
+                      className="mt-4 inline-flex items-center gap-1.5 text-sm text-[#4ade80] font-medium hover:text-white"
+                    >
+                      Ler matéria completa <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                   )}
                 </div>
-                <h3 className="font-display font-bold text-white text-lg leading-tight mb-2">{n.title}</h3>
-                <p className="text-sm text-[#A7F3D0]/80 leading-relaxed line-clamp-3 flex-1">{n.summary}</p>
-                {n.source_url && (
-                  <a
-                    href={n.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid={`news-link-${n.id}`}
-                    className="mt-4 inline-flex items-center gap-1.5 text-sm text-[#4ade80] font-medium hover:text-white"
-                  >
-                    Ler matéria completa <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+          {items.length > 3 && (
+            <div className="my-10">
+              <AdSlot format="fluid" layout="in-feed" layoutKey="-6t+ed+2i-1n-4w" testid="ad-news-in-feed" />
+            </div>
+          )}
+          {items.length > 3 && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.slice(3).map((n) => (
+                <article
+                  key={n.id}
+                  data-testid={`news-card-${n.id}`}
+                  className="grain-card neon-border rounded-2xl overflow-hidden group flex flex-col"
+                >
+                  <div className="relative aspect-[16/10] bg-[#0B100C] overflow-hidden">
+                    {n.image_url ? (
+                      <img src={n.image_url} alt={n.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Newspaper className="w-10 h-10 text-[#4ade80]/40" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#070A07] via-transparent to-transparent" />
+                    <span className="absolute top-3 left-3 font-mono text-[10px] px-2 py-1 rounded-md bg-[rgba(74,222,128,0.15)] text-[#4ade80] border border-[rgba(74,222,128,0.3)] uppercase tracking-wider">
+                      {n.category}
+                    </span>
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-2 text-xs font-mono text-[#6EE7B7] mb-3">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(n.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                      {n.source_name && (
+                        <>
+                          <span className="w-1 h-1 rounded-full bg-[#6EE7B7]" />
+                          <span>{n.source_name}</span>
+                        </>
+                      )}
+                    </div>
+                    <h3 className="font-display font-bold text-white text-lg leading-tight mb-2">{n.title}</h3>
+                    <p className="text-sm text-[#A7F3D0]/80 leading-relaxed line-clamp-3 flex-1">{n.summary}</p>
+                    {n.source_url && (
+                      <a
+                        href={n.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid={`news-link-${n.id}`}
+                        className="mt-4 inline-flex items-center gap-1.5 text-sm text-[#4ade80] font-medium hover:text-white"
+                      >
+                        Ler matéria completa <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+          <div className="mt-14">
+            <AdSlot testid="ad-news-bottom" />
+          </div>
+        </>
       )}
     </div>
   );

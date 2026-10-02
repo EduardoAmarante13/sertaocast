@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Play, Calendar, Mic2, Radio, Zap, Headphones, ArrowRight, Sparkles } from "lucide-react";
 import { api } from "../lib/api";
 import EpisodeCard from "../components/EpisodeCard";
+import AdSlot from "../components/AdSlot";
 import { usePlayer } from "../components/Layout";
 
 export default function Home() {
@@ -108,6 +109,11 @@ export default function Home() {
           {episodes.map((ep) => (
             <EpisodeCard key={ep.id} ep={ep} onPlay={player.play} isPlaying={player.current?.id === ep.id} />
           ))}
+        </div>
+
+        {/* In-article ad — high engagement spot between content & CTA */}
+        <div className="mt-14">
+          <AdSlot format="fluid" layout="in-article" testid="ad-home-in-article" />
         </div>
       </section>
 

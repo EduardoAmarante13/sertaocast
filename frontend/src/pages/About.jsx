@@ -1,4 +1,5 @@
 import { Mic2, Radio, Sparkles, Camera, Sliders, Music } from "lucide-react";
+import AdSlot from "../components/AdSlot";
 
 const HOSTS = [
   { name: "Eduardo Guenov", role: "Host & Idealizador", bio: "Curador cultural, produtor musical e apaixonado pelo Nordeste. Comanda o SertãoCast desde o primeiro episódio." },
@@ -51,6 +52,10 @@ export default function About() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mb-20">
+        <AdSlot format="fluid" layout="in-article" testid="ad-about-mid" />
       </div>
 
       <div>

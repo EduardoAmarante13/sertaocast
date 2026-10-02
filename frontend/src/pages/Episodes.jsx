@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { api } from "../lib/api";
 import EpisodeCard from "../components/EpisodeCard";
+import AdSlot from "../components/AdSlot";
 import { usePlayer } from "../components/Layout";
 
 const CATS = [
@@ -71,11 +72,28 @@ export default function Episodes() {
           Nenhum episódio encontrado.
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((ep) => (
-            <EpisodeCard key={ep.id} ep={ep} onPlay={player.play} isPlaying={player.current?.id === ep.id} />
-          ))}
-        </div>
+        <>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {items.slice(0, 3).map((ep) => (
+              <EpisodeCard key={ep.id} ep={ep} onPlay={player.play} isPlaying={player.current?.id === ep.id} />
+            ))}
+          </div>
+          {items.length > 3 && (
+            <div className="my-10">
+              <AdSlot format="fluid" layout="in-article" testid="ad-episodes-mid" />
+            </div>
+          )}
+          {items.length > 3 && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.slice(3).map((ep) => (
+                <EpisodeCard key={ep.id} ep={ep} onPlay={player.play} isPlaying={player.current?.id === ep.id} />
+              ))}
+            </div>
+          )}
+          <div className="mt-14">
+            <AdSlot testid="ad-episodes-bottom" />
+          </div>
+        </>
       )}
     </div>
   );
