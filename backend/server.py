@@ -128,6 +128,20 @@ class ContactMessage(BaseModel):
     message: str
 
 
+class NewsCreate(BaseModel):
+    title: str
+    summary: str
+    image_url: Optional[str] = ""
+    source_url: Optional[str] = ""
+    source_name: Optional[str] = ""
+    category: str = "geral"  # geral, cultura, musica, humor, entrevistas, negocios
+
+
+class News(NewsCreate):
+    id: str
+    published_at: str
+
+
 # ---------- Auth ----------
 @api_router.post("/auth/login")
 async def login(body: LoginRequest):
@@ -314,6 +328,46 @@ async def list_contact(admin=Depends(get_current_admin)):
     ]
 
 
+# ---------- News ----------
+@api_router.get("/news", response_model=List[News])
+async def list_news(category: Optional[str] = None, limit: int = 100):
+    query = {}
+    if category and category != "todos":
+        query["category"] = category
+    docs = await db.news.find(query).sort("published_at", -1).to_list(limit)
+    return [
+        News(
+            id=str(d["_id"]),
+            title=d["title"],
+            summary=d["summary"],
+            image_url=d.get("image_url", ""),
+            source_url=d.get("source_url", ""),
+            source_name=d.get("source_name", ""),
+            category=d.get("category", "geral"),
+            published_at=d["published_at"],
+        )
+        for d in docs
+    ]
+
+
+@api_router.post("/news", response_model=News)
+async def create_news(body: NewsCreate, admin=Depends(get_current_admin)):
+    doc = {
+        **body.model_dump(),
+        "published_at": datetime.now(timezone.utc).isoformat(),
+    }
+    result = await db.news.insert_one(doc)
+    return News(id=str(result.inserted_id), **{k: doc[k] for k in doc if k != "_id"})
+
+
+@api_router.delete("/news/{news_id}")
+async def delete_news(news_id: str, admin=Depends(get_current_admin)):
+    res = await db.news.delete_one({"_id": ObjectId(news_id)})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Notícia não encontrada")
+    return {"success": True}
+
+
 # ---------- Stats ----------
 @api_router.get("/stats")
 async def stats(admin=Depends(get_current_admin)):
@@ -321,6 +375,7 @@ async def stats(admin=Depends(get_current_admin)):
     total_bookings = await db.bookings.count_documents({"status": "confirmed"})
     cancelled = await db.bookings.count_documents({"status": "cancelled"})
     total_messages = await db.contact_messages.count_documents({})
+    total_news = await db.news.count_documents({})
     plays_agg = await db.episodes.aggregate(
         [{"$group": {"_id": None, "total": {"$sum": "$plays"}}}]
     ).to_list(1)
@@ -330,6 +385,7 @@ async def stats(admin=Depends(get_current_admin)):
         "confirmed_bookings": total_bookings,
         "cancelled_bookings": cancelled,
         "total_messages": total_messages,
+        "total_news": total_news,
         "total_plays": total_plays,
     }
 

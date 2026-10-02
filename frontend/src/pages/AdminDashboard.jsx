@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Plus, Trash2, X, Calendar, Mic, MessageSquare, PlayCircle, TrendingUp, Loader2 } from "lucide-react";
+import { LogOut, Plus, Trash2, X, Calendar, Mic, MessageSquare, PlayCircle, TrendingUp, Loader2, Newspaper, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../lib/auth";
 import { api, formatApiErrorDetail } from "../lib/api";
@@ -13,7 +13,9 @@ export default function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [episodes, setEpisodes] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [news, setNews] = useState([]);
   const [showEpModal, setShowEpModal] = useState(false);
+  const [showNewsModal, setShowNewsModal] = useState(false);
 
   useEffect(() => {
     if (checking) return;
@@ -22,13 +24,14 @@ export default function AdminDashboard() {
 
   const load = async () => {
     try {
-      const [s, b, e, m] = await Promise.all([
+      const [s, b, e, m, n] = await Promise.all([
         api.get("/stats"),
         api.get("/bookings"),
         api.get("/episodes"),
         api.get("/contact"),
+        api.get("/news"),
       ]);
-      setStats(s.data); setBookings(b.data); setEpisodes(e.data); setMessages(m.data);
+      setStats(s.data); setBookings(b.data); setEpisodes(e.data); setMessages(m.data); setNews(n.data);
     } catch (err) {
       toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Erro ao carregar");
     }
@@ -46,6 +49,11 @@ export default function AdminDashboard() {
   const deleteEpisode = async (id) => {
     if (!confirm("Excluir este episódio?")) return;
     try { await api.delete(`/episodes/${id}`); toast.success("Episódio excluído"); load(); }
+    catch { toast.error("Erro ao excluir"); }
+  };
+  const deleteNews = async (id) => {
+    if (!confirm("Excluir esta notícia?")) return;
+    try { await api.delete(`/news/${id}`); toast.success("Notícia excluída"); load(); }
     catch { toast.error("Erro ao excluir"); }
   };
 
@@ -67,18 +75,20 @@ export default function AdminDashboard() {
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <StatCard icon={Calendar} label="Reservas ativas" value={stats.confirmed_bookings} />
           <StatCard icon={Mic} label="Episódios" value={stats.total_episodes} />
+          <StatCard icon={Newspaper} label="Notícias" value={stats.total_news ?? 0} />
           <StatCard icon={PlayCircle} label="Total plays" value={stats.total_plays.toLocaleString("pt-BR")} />
           <StatCard icon={MessageSquare} label="Mensagens" value={stats.total_messages} />
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-[rgba(74,222,128,0.15)]">
+      <div className="flex gap-2 mb-6 border-b border-[rgba(74,222,128,0.15)] overflow-x-auto scrollbar-neon">
         <TabBtn active={tab === "bookings"} onClick={() => setTab("bookings")} tid="admin-tab-bookings">Agendamentos</TabBtn>
         <TabBtn active={tab === "episodes"} onClick={() => setTab("episodes")} tid="admin-tab-episodes">Episódios</TabBtn>
+        <TabBtn active={tab === "news"} onClick={() => setTab("news")} tid="admin-tab-news">Notícias</TabBtn>
         <TabBtn active={tab === "messages"} onClick={() => setTab("messages")} tid="admin-tab-messages">Mensagens</TabBtn>
       </div>
 
@@ -165,7 +175,53 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {tab === "news" && (
+        <div>
+          <div className="flex justify-end mb-4">
+            <button onClick={() => setShowNewsModal(true)} data-testid="admin-add-news-button" className="btn-neon px-5 py-2.5 rounded-xl inline-flex items-center gap-2">
+              <Plus className="w-4 h-4" /> Nova Notícia
+            </button>
+          </div>
+          {news.length === 0 ? (
+            <div className="grain-card neon-border rounded-2xl p-12 text-center text-[#6EE7B7]" data-testid="admin-news-empty">
+              <Newspaper className="w-10 h-10 text-[#4ade80] mx-auto mb-3" />
+              Cadastre a primeira notícia do SertãoCast.
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {news.map((n) => (
+                <div key={n.id} className="grain-card neon-border rounded-2xl overflow-hidden" data-testid={`admin-news-${n.id}`}>
+                  <div className="relative aspect-[16/9] bg-[#0B100C]">
+                    {n.image_url ? (
+                      <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Newspaper className="w-8 h-8 text-[#4ade80]/40" />
+                      </div>
+                    )}
+                    <span className="absolute top-2 left-2 font-mono text-[9px] px-2 py-0.5 rounded bg-[rgba(74,222,128,0.15)] text-[#4ade80] uppercase">{n.category}</span>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-display font-bold text-white mb-1 text-sm leading-snug line-clamp-2">{n.title}</h4>
+                    <div className="text-[11px] font-mono text-[#6EE7B7] mb-3">{new Date(n.published_at).toLocaleDateString("pt-BR")}{n.source_name ? ` • ${n.source_name}` : ""}</div>
+                    <div className="flex justify-between items-center">
+                      {n.source_url ? (
+                        <a href={n.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#4ade80] hover:text-white inline-flex items-center gap-1">
+                          Abrir link <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : <span />}
+                      <button onClick={() => deleteNews(n.id)} data-testid={`admin-delete-news-${n.id}`} className="text-[#ef4444] hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {showEpModal && <EpisodeModal onClose={() => setShowEpModal(false)} onSaved={() => { setShowEpModal(false); load(); }} />}
+      {showNewsModal && <NewsModal onClose={() => setShowNewsModal(false)} onSaved={() => { setShowNewsModal(false); load(); }} />}
     </div>
   );
 }
@@ -251,6 +307,55 @@ function ModalField({ label, value, onChange, testid, placeholder }) {
     <div>
       <label className="text-xs font-mono uppercase text-[#6EE7B7] mb-1 block">{label}</label>
       <input data-testid={testid} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-[#0B100C] border border-[rgba(74,222,128,0.2)] text-white focus:border-[#4ade80] focus:outline-none" />
+    </div>
+  );
+}
+
+function NewsModal({ onClose, onSaved }) {
+  const [form, setForm] = useState({ title: "", summary: "", image_url: "", source_url: "", source_name: "", category: "geral" });
+  const [loading, setLoading] = useState(false);
+
+  const save = async () => {
+    if (!form.title || !form.summary) { toast.error("Preencha título e resumo"); return; }
+    setLoading(true);
+    try {
+      await api.post("/news", form);
+      toast.success("Notícia cadastrada!");
+      onSaved();
+    } catch (err) {
+      toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Erro ao cadastrar");
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="grain-card neon-border rounded-2xl p-6 max-w-lg w-full my-8">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="font-display font-bold text-xl text-white">Nova Notícia</h3>
+          <button onClick={onClose} className="text-[#6EE7B7]"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="space-y-3">
+          <ModalField label="Título *" testid="news-title-input" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+          <div>
+            <label className="text-xs font-mono uppercase text-[#6EE7B7] mb-1 block">Resumo *</label>
+            <textarea data-testid="news-summary-input" rows={3} value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-[#0B100C] border border-[rgba(74,222,128,0.2)] text-white focus:border-[#4ade80] focus:outline-none resize-none" />
+          </div>
+          <ModalField label="URL da imagem" placeholder="https://..." testid="news-image-input" value={form.image_url} onChange={(v) => setForm({ ...form, image_url: v })} />
+          <div className="grid grid-cols-2 gap-3">
+            <ModalField label="Fonte (nome)" placeholder="G1, Folha..." testid="news-source-name-input" value={form.source_name} onChange={(v) => setForm({ ...form, source_name: v })} />
+            <div>
+              <label className="text-xs font-mono uppercase text-[#6EE7B7] mb-1 block">Categoria</label>
+              <select data-testid="news-cat-input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-[#0B100C] border border-[rgba(74,222,128,0.2)] text-white focus:border-[#4ade80] focus:outline-none">
+                {["geral", "cultura", "musica", "humor", "entrevistas", "negocios"].map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+          <ModalField label="Link de postagem (URL)" placeholder="https://..." testid="news-source-url-input" value={form.source_url} onChange={(v) => setForm({ ...form, source_url: v })} />
+        </div>
+        <button onClick={save} disabled={loading} data-testid="news-save-button" className="btn-neon w-full mt-6 py-3 rounded-xl inline-flex items-center justify-center gap-2 disabled:opacity-60">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Publicar Notícia</>}
+        </button>
+      </div>
     </div>
   );
 }

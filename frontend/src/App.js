@@ -7,6 +7,7 @@ import Episodes from "@/pages/Episodes";
 import About from "@/pages/About";
 import Booking from "@/pages/Booking";
 import Contact from "@/pages/Contact";
+import News from "@/pages/News";
 import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import { AuthProvider } from "@/lib/auth";
@@ -20,6 +21,7 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
               <Route path="/episodios" element={<Episodes />} />
+              <Route path="/noticias" element={<News />} />
               <Route path="/sobre" element={<About />} />
               <Route path="/agendar" element={<Booking />} />
               <Route path="/contato" element={<Contact />} />

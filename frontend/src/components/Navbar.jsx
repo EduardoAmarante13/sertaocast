@@ -1,10 +1,12 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Radio, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import Logo from "./Logo";
 
 const NAV = [
   { to: "/", label: "Home", tid: "nav-home-link" },
   { to: "/episodios", label: "Episódios", tid: "nav-episodes-link" },
+  { to: "/noticias", label: "Notícias", tid: "nav-news-link" },
   { to: "/sobre", label: "Sobre", tid: "nav-about-link" },
   { to: "/agendar", label: "Agendar Sala", tid: "nav-booking-link" },
   { to: "/contato", label: "Contato", tid: "nav-contact-link" },
@@ -17,18 +19,8 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 glass border-b border-[rgba(74,222,128,0.15)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3" data-testid="nav-logo">
-          <div className="relative">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4ade80] to-[#06b6d4] flex items-center justify-center shadow-[0_0_20px_rgba(74,222,128,0.5)]">
-              <Radio className="w-5 h-5 text-[#052e16]" strokeWidth={2.5} />
-            </div>
-          </div>
-          <div className="leading-none">
-            <div className="font-display font-black text-lg tracking-tight text-white">SERTÃO<span className="neon-text">CAST</span></div>
-            <div className="font-mono text-[10px] text-[#6EE7B7] mt-0.5 flex items-center gap-1.5">
-              <span className="pulse-dot"></span> NO AR
-            </div>
-          </div>
+        <Link to="/" data-testid="nav-logo">
+          <Logo size={44} />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">

@@ -54,20 +54,16 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right: Bento visual */}
+          {/* Right: Bento visual with logo */}
           <div className="lg:col-span-5 relative">
             <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 grain-card neon-border rounded-2xl p-6 aspect-[16/9] relative overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1615458317538-72c46d9359d8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwyfHxwb2RjYXN0JTIwc3R1ZGlvJTIwbWljcm9waG9uZSUyMG5lb24lMjBuZW9uJTIwZ3JlZW4lMjBsaWdodGluZyUyMHJhZGlvJTIwYnJvYWRjYXN0JTIwaG9zdCUyMG1pY3JvcGhvbmV8ZW58MHx8fHwxNzg4OTc4MzcxfDA&ixlib=rb-4.1.0&q=85" className="absolute inset-0 w-full h-full object-cover opacity-60" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070A07] via-[#070A07]/60 to-transparent" />
-                <div className="relative z-10 h-full flex flex-col justify-end">
-                  <div className="flex items-end gap-1 h-16 mb-3">
-                    {Array.from({ length: 32 }).map((_, i) => (
-                      <div key={i} className="wave-bar w-1.5 flex-1" style={{ animationDelay: `${i * 0.04}s`, height: `${25 + (i % 7) * 10}%` }} />
-                    ))}
-                  </div>
-                  <div className="font-mono text-[10px] uppercase tracking-widest text-[#4ade80]">Live Studio</div>
-                  <div className="font-display text-xl font-bold text-white">Cabine Neon 01</div>
+              <div className="col-span-2 grain-card neon-border rounded-2xl p-6 aspect-square relative overflow-hidden flex items-center justify-center">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(74,222,128,0.25),transparent_60%)]" />
+                <img src="/logo.png" alt="SertãoCast" className="relative z-10 w-full max-w-[380px] drop-shadow-[0_0_40px_rgba(74,222,128,0.6)]" />
+                <div className="absolute bottom-4 left-6 right-6 flex items-end gap-1 h-10 z-10">
+                  {Array.from({ length: 32 }).map((_, i) => (
+                    <div key={i} className="wave-bar w-1 flex-1" style={{ animationDelay: `${i * 0.04}s`, height: `${25 + (i % 7) * 10}%` }} />
+                  ))}
                 </div>
               </div>
               <div className="grain-card neon-border rounded-2xl p-5">
