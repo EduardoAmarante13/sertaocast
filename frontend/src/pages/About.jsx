@@ -1,9 +1,6 @@
 import GearList from "../components/GearList";
+import HostList from "../components/HostList";
 import AdSlot from "../components/AdSlot";
-
-const HOSTS = [
-  { name: "Eduardo Guenov", role: "Host & Idealizador", bio: "Curador cultural, produtor e apaixonado pelo Nordeste. Comanda o SertãoCast desde o primeiro episódio." },
-];
 
 export default function About() {
   return (
@@ -30,18 +27,7 @@ export default function About() {
 
       <div className="mb-20">
         <h2 className="font-display font-black text-3xl lg:text-4xl text-white mb-8">Quem tá no <span className="neon-text">microfone</span></h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {HOSTS.map((h) => (
-            <div key={h.name} className="grain-card neon-border rounded-2xl p-8" data-testid={`host-${h.name.split(' ')[0].toLowerCase()}`}>
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4ade80] to-[#06b6d4] flex items-center justify-center font-display font-black text-2xl text-[#052e16] mb-5">
-                {h.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-              </div>
-              <div className="font-display font-bold text-xl text-white">{h.name}</div>
-              <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mt-1 mb-4">{h.role}</div>
-              <p className="text-sm text-[#A7F3D0]/85 leading-relaxed">{h.bio}</p>
-            </div>
-          ))}
-        </div>
+        <HostList />
       </div>
 
       <div className="mb-20">

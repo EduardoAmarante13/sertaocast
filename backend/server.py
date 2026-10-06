@@ -153,6 +153,18 @@ class Gear(GearItem):
     created_at: str
 
 
+class HostItem(BaseModel):
+    name: str
+    role: str
+    bio: str
+
+
+class Host(HostItem):
+    id: str
+    order: int = 0
+    created_at: str
+
+
 class BannerUpsert(BaseModel):
     slot_id: Optional[str] = ""
     enabled: bool = True
@@ -382,6 +394,40 @@ async def delete_gear(gear_id: str, admin=Depends(get_current_admin)):
     return {"success": True}
 
 
+# ---------- Hosts ----------
+@api_router.get("/hosts", response_model=List[Host])
+async def list_hosts():
+    docs = await db.hosts.find().sort("order", 1).to_list(100)
+    return [
+        Host(
+            id=str(d["_id"]),
+            name=d["name"],
+            role=d["role"],
+            bio=d["bio"],
+            order=d.get("order", 0),
+            created_at=d["created_at"],
+        )
+        for d in docs
+    ]
+
+
+@api_router.post("/hosts", response_model=Host)
+async def create_host(body: HostItem, admin=Depends(get_current_admin)):
+    last = await db.hosts.find_one(sort=[("order", -1)])
+    order = (last["order"] + 1) if last else 1
+    doc = {**body.model_dump(), "order": order, "created_at": datetime.now(timezone.utc).isoformat()}
+    result = await db.hosts.insert_one(doc)
+    return Host(id=str(result.inserted_id), **{k: doc[k] for k in doc if k != "_id"})
+
+
+@api_router.delete("/hosts/{host_id}")
+async def delete_host(host_id: str, admin=Depends(get_current_admin)):
+    res = await db.hosts.delete_one({"_id": ObjectId(host_id)})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Host não encontrado")
+    return {"success": True}
+
+
 # ---------- Banners (ad slots) ----------
 @api_router.get("/banners", response_model=List[Banner])
 async def list_banners():
@@ -464,6 +510,7 @@ async def stats(admin=Depends(get_current_admin)):
     total_messages = await db.contact_messages.count_documents({})
     total_news = await db.news.count_documents({})
     total_gear = await db.gear.count_documents({})
+    total_hosts = await db.hosts.count_documents({})
     plays_agg = await db.episodes.aggregate(
         [{"$group": {"_id": None, "total": {"$sum": "$plays"}}}]
     ).to_list(1)
@@ -475,6 +522,7 @@ async def stats(admin=Depends(get_current_admin)):
         "total_messages": total_messages,
         "total_news": total_news,
         "total_gear": total_gear,
+        "total_hosts": total_hosts,
         "total_plays": total_plays,
     }
 
@@ -551,6 +599,24 @@ SEED_BANNERS = [
     {"name": "about-mid", "description": "Sobre — entre hosts e setup"},
 ]
 
+SEED_HOSTS = [
+    {
+        "name": "Eduardo Amarante",
+        "role": "Idealizador, Produtor & Programador",
+        "bio": "Idealizador do SertãoCast. Produtor, programador e criador de conteúdo — une tecnologia e cultura para transformar ideias em projetos digitais com a alma do sertão.",
+    },
+    {
+        "name": "Roque Morais",
+        "role": "Co-criador, CEO & Caster",
+        "bio": "Co-fundador e CEO do SertãoCast. Caster experiente e voz atuante no cenário político, conduz debates, provocações e análises que colocam o Nordeste no centro da conversa.",
+    },
+    {
+        "name": "Gilvan",
+        "role": "Idealizador, Caster & Especialista em Mídia Digital",
+        "bio": "Idealizador e caster, Gilvan é referência em promoção digital. Criador de conteúdo e dono de páginas importantes de notícias, conecta o SertãoCast ao público certo e amplifica cada episódio.",
+    },
+]
+
 
 async def seed_data():
     admin_email = os.environ["ADMIN_EMAIL"].lower().strip()
@@ -578,6 +644,16 @@ async def seed_data():
             {"$setOnInsert": {"name": b["name"], "slot_id": "", "enabled": True, "description": b["description"]}},
             upsert=True,
         )
+
+    if await db.hosts.count_documents({}) == 0:
+        for i, h in enumerate(SEED_HOSTS, start=1):
+            await db.hosts.insert_one(
+                {
+                    **h,
+                    "order": i,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
 
 
 @app.on_event("startup")

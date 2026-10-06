@@ -17,10 +17,12 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState([]);
   const [news, setNews] = useState([]);
   const [gear, setGear] = useState([]);
+  const [hosts, setHosts] = useState([]);
   const { banners, refresh: refreshBanners } = useBanners();
   const [showEpModal, setShowEpModal] = useState(false);
   const [showNewsModal, setShowNewsModal] = useState(false);
   const [showGearModal, setShowGearModal] = useState(false);
+  const [showHostModal, setShowHostModal] = useState(false);
 
   useEffect(() => {
     if (checking) return;
@@ -29,15 +31,16 @@ export default function AdminDashboard() {
 
   const load = async () => {
     try {
-      const [s, b, e, m, n, g] = await Promise.all([
+      const [s, b, e, m, n, g, h] = await Promise.all([
         api.get("/stats"),
         api.get("/bookings"),
         api.get("/episodes"),
         api.get("/contact"),
         api.get("/news"),
         api.get("/gear"),
+        api.get("/hosts"),
       ]);
-      setStats(s.data); setBookings(b.data); setEpisodes(e.data); setMessages(m.data); setNews(n.data); setGear(g.data);
+      setStats(s.data); setBookings(b.data); setEpisodes(e.data); setMessages(m.data); setNews(n.data); setGear(g.data); setHosts(h.data);
       refreshBanners();
     } catch (err) {
       toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Erro ao carregar");
@@ -66,6 +69,11 @@ export default function AdminDashboard() {
   const deleteGear = async (id) => {
     if (!confirm("Excluir este equipamento?")) return;
     try { await api.delete(`/gear/${id}`); toast.success("Equipamento excluído"); load(); }
+    catch { toast.error("Erro ao excluir"); }
+  };
+  const deleteHost = async (id) => {
+    if (!confirm("Excluir este host?")) return;
+    try { await api.delete(`/hosts/${id}`); toast.success("Host excluído"); load(); }
     catch { toast.error("Erro ao excluir"); }
   };
   const saveBanner = async (name, slot_id, enabled) => {
@@ -110,6 +118,7 @@ export default function AdminDashboard() {
         <TabBtn active={tab === "news"} onClick={() => setTab("news")} tid="admin-tab-news">Notícias</TabBtn>
         <TabBtn active={tab === "episodes"} onClick={() => setTab("episodes")} tid="admin-tab-episodes">Episódios</TabBtn>
         <TabBtn active={tab === "gear"} onClick={() => setTab("gear")} tid="admin-tab-gear">Equipamentos</TabBtn>
+        <TabBtn active={tab === "hosts"} onClick={() => setTab("hosts")} tid="admin-tab-hosts">Hosts</TabBtn>
         <TabBtn active={tab === "bookings"} onClick={() => setTab("bookings")} tid="admin-tab-bookings">Reservas</TabBtn>
         <TabBtn active={tab === "messages"} onClick={() => setTab("messages")} tid="admin-tab-messages">Mensagens</TabBtn>
         <TabBtn active={tab === "banners"} onClick={() => setTab("banners")} tid="admin-tab-banners">Banners</TabBtn>
@@ -246,6 +255,39 @@ export default function AdminDashboard() {
       {showEpModal && <EpisodeModal onClose={() => setShowEpModal(false)} onSaved={() => { setShowEpModal(false); load(); }} />}
       {showNewsModal && <NewsModal onClose={() => setShowNewsModal(false)} onSaved={() => { setShowNewsModal(false); load(); }} />}
       {showGearModal && <GearModal onClose={() => setShowGearModal(false)} onSaved={() => { setShowGearModal(false); load(); }} />}
+      {showHostModal && <HostModal onClose={() => setShowHostModal(false)} onSaved={() => { setShowHostModal(false); load(); }} />}
+
+      {tab === "hosts" && (
+        <div>
+          <div className="flex justify-end mb-4">
+            <button onClick={() => setShowHostModal(true)} data-testid="admin-add-host-button" className="btn-neon px-5 py-2.5 rounded-xl inline-flex items-center gap-2">
+              <Plus className="w-4 h-4" /> Novo Host
+            </button>
+          </div>
+          {hosts.length === 0 ? (
+            <div className="grain-card neon-border rounded-2xl p-12 text-center" data-testid="admin-hosts-empty">
+              <Mic className="w-10 h-10 text-[#4ade80] mx-auto mb-3" />
+              <div className="text-[#A7F3D0]">Cadastre os hosts que comandam os microfones.</div>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {hosts.map((h) => (
+                <div key={h.id} className="grain-card neon-border rounded-2xl p-5" data-testid={`admin-host-${h.id}`}>
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4ade80] to-[#06b6d4] flex items-center justify-center font-display font-black text-lg text-[#052e16]">
+                      {h.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                    </div>
+                    <button onClick={() => deleteHost(h.id)} data-testid={`admin-delete-host-${h.id}`} className="text-[#ef4444] hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                  <div className="font-display font-bold text-white">{h.name}</div>
+                  <div className="font-mono text-[10px] uppercase text-[#4ade80] mt-1 mb-3">{h.role}</div>
+                  <p className="text-xs text-[#A7F3D0]/80 leading-relaxed line-clamp-4">{h.bio}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {tab === "gear" && (
         <div>
@@ -377,6 +419,46 @@ function GearModal({ onClose, onSaved }) {
         </div>
         <button onClick={save} disabled={loading} data-testid="gear-save-button" className="btn-neon w-full mt-6 py-3 rounded-xl inline-flex items-center justify-center gap-2 disabled:opacity-60">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Cadastrar</>}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function HostModal({ onClose, onSaved }) {
+  const [form, setForm] = useState({ name: "", role: "", bio: "" });
+  const [loading, setLoading] = useState(false);
+  const save = async () => {
+    if (!form.name || !form.role || !form.bio) { toast.error("Preencha nome, função e bio"); return; }
+    setLoading(true);
+    try { await api.post("/hosts", form); toast.success("Host cadastrado"); onSaved(); }
+    catch (err) { toast.error(formatApiErrorDetail(err.response?.data?.detail) || "Erro"); }
+    finally { setLoading(false); }
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="grain-card neon-border rounded-2xl p-6 max-w-md w-full my-8">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="font-display font-bold text-xl text-white">Novo Host</h3>
+          <button onClick={onClose} className="text-[#6EE7B7]"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="space-y-3">
+          <ModalField label="Nome *" placeholder="Ex: Eduardo Amarante" testid="host-name-input" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
+          <ModalField label="Função *" placeholder="Ex: Idealizador & Caster" testid="host-role-input" value={form.role} onChange={(v) => setForm({ ...form, role: v })} />
+          <div>
+            <label className="text-xs font-mono uppercase text-[#6EE7B7] mb-1 block">Bio *</label>
+            <textarea
+              data-testid="host-bio-input"
+              rows={4}
+              value={form.bio}
+              onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl bg-[#0B100C] border border-[rgba(74,222,128,0.2)] text-white focus:border-[#4ade80] focus:outline-none resize-none"
+              placeholder="Breve descrição do host..."
+            />
+          </div>
+        </div>
+        <button onClick={save} disabled={loading} data-testid="host-save-button" className="btn-neon w-full mt-6 py-3 rounded-xl inline-flex items-center justify-center gap-2 disabled:opacity-60">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Cadastrar Host</>}
         </button>
       </div>
     </div>
