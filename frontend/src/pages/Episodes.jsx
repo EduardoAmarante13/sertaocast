@@ -80,7 +80,7 @@ export default function Episodes() {
           </div>
           {items.length > 3 && (
             <div className="my-10">
-              <AdSlot format="fluid" layout="in-article" testid="ad-episodes-mid" />
+              <AdSlot name="episodes-mid" format="fluid" layout="in-article" testid="ad-episodes-mid" />
             </div>
           )}
           {items.length > 3 && (
@@ -91,7 +91,7 @@ export default function Episodes() {
             </div>
           )}
           <div className="mt-14">
-            <AdSlot testid="ad-episodes-bottom" />
+            <AdSlot name="episodes-mid" testid="ad-episodes-bottom" />
           </div>
         </>
       )}

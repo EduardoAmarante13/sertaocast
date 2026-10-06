@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Play, Calendar, Mic2, Radio, Zap, Headphones, ArrowRight, Sparkles } from "lucide-react";
+import { Play, Calendar, Zap, Headphones, ArrowRight, Sparkles, Newspaper, ExternalLink, MessageCircle } from "lucide-react";
 import { api } from "../lib/api";
 import EpisodeCard from "../components/EpisodeCard";
 import AdSlot from "../components/AdSlot";
@@ -8,10 +8,12 @@ import { usePlayer } from "../components/Layout";
 
 export default function Home() {
   const [episodes, setEpisodes] = useState([]);
+  const [news, setNews] = useState([]);
   const player = usePlayer();
 
   useEffect(() => {
     api.get("/episodes").then((r) => setEpisodes(r.data.slice(0, 3))).catch(() => {});
+    api.get("/news", { params: { limit: 3 } }).then((r) => setNews(r.data.slice(0, 3))).catch(() => {});
   }, []);
 
   return (
@@ -25,7 +27,7 @@ export default function Home() {
           <div className="lg:col-span-7 relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(74,222,128,0.3)] bg-[rgba(74,222,128,0.05)] mb-8">
               <span className="pulse-dot"></span>
-              <span className="font-mono text-[11px] tracking-wider text-[#4ade80] uppercase">Episódio 06 • No Ar Agora</span>
+              <span className="font-mono text-[11px] tracking-wider text-[#4ade80] uppercase">SertãoCast • No Ar</span>
             </div>
             <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-7xl leading-[0.95] tracking-tight text-white">
               A voz do<br />
@@ -39,23 +41,12 @@ export default function Home() {
               <Link to="/agendar" data-testid="hero-book-studio-button" className="btn-neon px-7 py-4 rounded-xl inline-flex items-center gap-2 justify-center">
                 <Calendar className="w-5 h-5" /> Agendar a Sala
               </Link>
-              <button
-                data-testid="hero-play-latest-button"
-                onClick={() => episodes[0] && player.play(episodes[0])}
-                className="btn-ghost-neon px-7 py-4 rounded-xl inline-flex items-center gap-2 justify-center"
-              >
-                <Play className="w-5 h-5" /> Ouvir último episódio
-              </button>
-            </div>
-
-            <div className="mt-14 grid grid-cols-3 gap-6 max-w-lg">
-              <Stat n="120K+" label="Plays / mês" />
-              <Stat n="+50" label="Episódios" />
-              <Stat n="4.9★" label="Avaliação" />
+              <Link to="/episodios" data-testid="hero-episodes-button" className="btn-ghost-neon px-7 py-4 rounded-xl inline-flex items-center gap-2 justify-center">
+                <Play className="w-5 h-5" /> Ver episódios
+              </Link>
             </div>
           </div>
 
-          {/* Right: Bento visual with logo */}
           <div className="lg:col-span-5 relative">
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 grain-card neon-border rounded-2xl p-6 aspect-square relative overflow-hidden flex items-center justify-center">
@@ -67,35 +58,100 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              <div className="grain-card neon-border rounded-2xl p-5">
-                <Mic2 className="w-6 h-6 text-[#4ade80] mb-3" />
-                <div className="text-xs font-mono text-[#6EE7B7] mb-1">EQUIPAMENTO</div>
-                <div className="font-display font-bold text-white">Shure SM7B</div>
-              </div>
-              <div className="grain-card neon-border rounded-2xl p-5">
-                <Zap className="w-6 h-6 text-[#06b6d4] mb-3" />
-                <div className="text-xs font-mono text-[#6EE7B7] mb-1">RESERVAS</div>
-                <div className="font-display font-bold text-white">Confirmação instantânea</div>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CATEGORIES STRIP */}
-      <section className="border-y border-[rgba(74,222,128,0.15)] py-8 bg-[#0B100C]/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 flex flex-wrap items-center justify-between gap-6">
-          <div className="font-mono text-xs uppercase tracking-widest text-[#6EE7B7]">Categorias</div>
-          {["Cultura", "Música", "Humor", "Entrevistas", "Negócios"].map((c) => (
-            <div key={c} className="font-display font-bold text-xl lg:text-2xl text-white/70 hover:text-[#4ade80] transition-colors cursor-default">
-              {c}
-            </div>
-          ))}
+      {/* SOBRE O PROJETO */}
+      <section className="relative py-20 border-y border-[rgba(74,222,128,0.15)] bg-[#0B100C]/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 grid lg:grid-cols-12 gap-10 items-start">
+          <div className="lg:col-span-7">
+            <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mb-3">// Sobre o SertãoCast</div>
+            <h2 className="font-display font-black text-3xl lg:text-5xl text-white leading-tight">
+              Cultura, tecnologia e um <span className="neon-text">pé no chão</span>.
+            </h2>
+            <p className="mt-6 text-lg text-[#A7F3D0] leading-relaxed">
+              O SertãoCast nasceu para dar voz ao que pulsa no interior do Brasil e conectar essa energia ao mundo digital. Somos um estúdio, um podcast e um ponto de encontro para quem quer contar, ouvir e criar histórias que fazem sentido.
+            </p>
+            <p className="mt-4 text-[#A7F3D0]/80 leading-relaxed">
+              Da literatura de cordel ao lo-fi eletrônico, do causo de boteco ao debate cultural — trazemos convidados que refletem a diversidade do sertão contemporâneo.
+            </p>
+            <Link to="/sobre" className="mt-6 inline-flex items-center gap-2 text-[#4ade80] hover:text-white font-medium text-sm" data-testid="home-about-link">
+              Conheça o projeto <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="lg:col-span-5 grid grid-cols-2 gap-3">
+            {[
+              { icon: Zap, label: "Agendamento rápido via WhatsApp" },
+              { icon: Headphones, label: "Episódios variados sem filtro" },
+              { icon: Sparkles, label: "Estúdio com iluminação cênica" },
+              { icon: Newspaper, label: "Notícias direto da redação" },
+            ].map((it, i) => (
+              <div key={i} className="neon-border rounded-xl p-4 bg-[#0B100C]/60">
+                <it.icon className="w-5 h-5 text-[#4ade80] mb-2" />
+                <div className="text-sm text-white font-medium">{it.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* LATEST EPISODES */}
+      {/* ÚLTIMAS NOTÍCIAS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-20">
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mb-3">// Da redação</div>
+            <h2 className="font-display font-black text-3xl lg:text-5xl text-white">Últimas notícias</h2>
+          </div>
+          <Link to="/noticias" className="hidden md:inline-flex items-center gap-2 text-[#4ade80] hover:text-white font-medium text-sm" data-testid="home-all-news-link">
+            Ver todas <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {news.length === 0 ? (
+          <div className="grain-card neon-border rounded-2xl p-12 text-center" data-testid="home-news-empty">
+            <Newspaper className="w-10 h-10 text-[#4ade80] mx-auto mb-4" />
+            <div className="font-display font-bold text-xl text-white mb-2">Nenhuma notícia publicada ainda</div>
+            <p className="text-sm text-[#6EE7B7]">O admin cadastra as notícias direto do painel.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {news.map((n) => (
+              <article key={n.id} className="grain-card neon-border rounded-2xl overflow-hidden group flex flex-col" data-testid={`home-news-card-${n.id}`}>
+                <div className="relative aspect-[16/10] bg-[#0B100C] overflow-hidden">
+                  {n.image_url ? (
+                    <img src={n.image_url} alt={n.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Newspaper className="w-10 h-10 text-[#4ade80]/40" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#070A07] via-transparent to-transparent" />
+                  <span className="absolute top-3 left-3 font-mono text-[10px] px-2 py-1 rounded-md bg-[rgba(74,222,128,0.15)] text-[#4ade80] border border-[rgba(74,222,128,0.3)] uppercase tracking-wider">{n.category}</span>
+                </div>
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 text-xs font-mono text-[#6EE7B7] mb-3">
+                    <Calendar className="w-3 h-3" />
+                    {new Date(n.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                    {n.source_name && (<><span className="w-1 h-1 rounded-full bg-[#6EE7B7]" /><span>{n.source_name}</span></>)}
+                  </div>
+                  <h3 className="font-display font-bold text-white text-lg leading-tight mb-2">{n.title}</h3>
+                  <p className="text-sm text-[#A7F3D0]/80 leading-relaxed line-clamp-3 flex-1">{n.summary}</p>
+                  {n.source_url && (
+                    <a href={n.source_url} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-sm text-[#4ade80] font-medium hover:text-white">
+                      Ler matéria <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ÚLTIMOS EPISÓDIOS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-20">
         <div className="flex items-end justify-between mb-10">
           <div>
             <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mb-3">// Últimos episódios</div>
@@ -105,15 +161,22 @@ export default function Home() {
             Ver todos <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {episodes.map((ep) => (
-            <EpisodeCard key={ep.id} ep={ep} onPlay={player.play} isPlaying={player.current?.id === ep.id} />
-          ))}
-        </div>
+        {episodes.length === 0 ? (
+          <div className="grain-card neon-border rounded-2xl p-12 text-center" data-testid="home-episodes-empty">
+            <Headphones className="w-10 h-10 text-[#4ade80] mx-auto mb-4" />
+            <div className="font-display font-bold text-xl text-white mb-2">Nenhum episódio ainda</div>
+            <p className="text-sm text-[#6EE7B7]">O admin pode cadastrar episódios pelo painel administrativo.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {episodes.map((ep) => (
+              <EpisodeCard key={ep.id} ep={ep} onPlay={player.play} isPlaying={player.current?.id === ep.id} />
+            ))}
+          </div>
+        )}
 
-        {/* In-article ad — high engagement spot between content & CTA */}
         <div className="mt-14">
-          <AdSlot format="fluid" layout="in-article" testid="ad-home-in-article" />
+          <AdSlot name="home-in-article" format="fluid" layout="in-article" />
         </div>
       </section>
 
@@ -127,36 +190,17 @@ export default function Home() {
               Sua voz merece uma <span className="neon-text">cabine neon</span>.
             </h3>
             <p className="text-[#A7F3D0] leading-relaxed mb-6">
-              Grave seu próprio podcast em nossa sala equipada com microfones Shure SM7B, câmeras 4K e mesa Rødecaster. Reserva com confirmação automática.
+              Grave seu próprio podcast no nosso estúdio. Preencha os dados e finalize a reserva direto no WhatsApp — sem burocracia.
             </p>
             <Link to="/agendar" className="btn-neon inline-flex items-center gap-2 px-6 py-3 rounded-xl" data-testid="home-cta-book">
-              <Headphones className="w-5 h-5" /> Reservar horário
+              <MessageCircle className="w-5 h-5" /> Reservar via WhatsApp
             </Link>
           </div>
-          <div className="relative z-10 grid grid-cols-2 gap-3">
-            {[
-              { icon: Mic2, label: "4 mics profissionais" },
-              { icon: Radio, label: "Transmissão ao vivo" },
-              { icon: Zap, label: "Aprovação instantânea" },
-              { icon: Sparkles, label: "Iluminação cênica" },
-            ].map((it, i) => (
-              <div key={i} className="neon-border rounded-xl p-4 bg-[#0B100C]/50">
-                <it.icon className="w-5 h-5 text-[#4ade80] mb-2" />
-                <div className="text-sm text-white font-medium">{it.label}</div>
-              </div>
-            ))}
+          <div className="relative z-10 flex items-center justify-center">
+            <img src="/logo.png" alt="SertãoCast" className="w-full max-w-[260px] drop-shadow-[0_0_40px_rgba(74,222,128,0.5)]" />
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function Stat({ n, label }) {
-  return (
-    <div>
-      <div className="font-display font-black text-3xl text-white">{n}</div>
-      <div className="font-mono text-[10px] uppercase tracking-widest text-[#6EE7B7] mt-1">{label}</div>
     </div>
   );
 }

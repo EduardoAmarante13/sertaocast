@@ -1,18 +1,8 @@
-import { Mic2, Radio, Sparkles, Camera, Sliders, Music } from "lucide-react";
+import GearList from "../components/GearList";
 import AdSlot from "../components/AdSlot";
 
 const HOSTS = [
-  { name: "Eduardo Guenov", role: "Host & Idealizador", bio: "Curador cultural, produtor musical e apaixonado pelo Nordeste. Comanda o SertãoCast desde o primeiro episódio." },
-  { name: "Chico Violeiro", role: "Cohost & Cantador", bio: "Poeta, cantador e engenheiro de som. Traz a viola e a raiz das rimas para dentro do estúdio." },
-];
-
-const GEAR = [
-  { icon: Mic2, name: "Shure SM7B", note: "4 unidades" },
-  { icon: Sliders, name: "Rødecaster Pro II", note: "Mixer multitrack" },
-  { icon: Camera, name: "Sony Alpha 4K", note: "3 câmeras" },
-  { icon: Sparkles, name: "Iluminação Neon", note: "Painéis LED programáveis" },
-  { icon: Music, name: "Ableton Live 12", note: "Trilhas ao vivo" },
-  { icon: Radio, name: "Transmissão RTMP", note: "YouTube / Twitch" },
+  { name: "Eduardo Guenov", role: "Host & Idealizador", bio: "Curador cultural, produtor e apaixonado pelo Nordeste. Comanda o SertãoCast desde o primeiro episódio." },
 ];
 
 export default function About() {
@@ -32,8 +22,8 @@ export default function About() {
           </p>
         </div>
         <div className="lg:col-span-5">
-          <div className="grain-card neon-border rounded-2xl overflow-hidden aspect-[4/5]">
-            <img src="https://images.unsplash.com/photo-1668537338628-85b9970bf17f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwxfHxwb2RjYXN0JTIwc3R1ZGlvJTIwbWljcm9waG9uZSUyMG5lb24lMjBuZW9uJTIwZ3JlZW4lMjBsaWdodGluZyUyMHJhZGlvJTIwYnJvYWRjYXN0JTIwaG9zdCUyMG1pY3JvcGhvbmV8ZW58MHx8fHwxNzg4OTc4MzcxfDA&ixlib=rb-4.1.0&q=85" className="w-full h-full object-cover" />
+          <div className="grain-card neon-border rounded-2xl overflow-hidden aspect-[4/5] flex items-center justify-center p-10 bg-[radial-gradient(circle_at_center,rgba(74,222,128,0.18),transparent_70%)]">
+            <img src="/logo.png" alt="SertãoCast" className="w-full max-w-[300px] drop-shadow-[0_0_40px_rgba(74,222,128,0.5)]" />
           </div>
         </div>
       </div>
@@ -55,24 +45,12 @@ export default function About() {
       </div>
 
       <div className="mb-20">
-        <AdSlot format="fluid" layout="in-article" testid="ad-about-mid" />
+        <AdSlot name="about-mid" format="fluid" layout="in-article" />
       </div>
 
       <div>
         <h2 className="font-display font-black text-3xl lg:text-4xl text-white mb-8">Setup do <span className="neon-text">estúdio</span></h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {GEAR.map((g) => (
-            <div key={g.name} className="grain-card neon-border rounded-2xl p-6 flex items-start gap-4">
-              <div className="w-11 h-11 rounded-xl bg-[rgba(74,222,128,0.1)] flex items-center justify-center flex-shrink-0">
-                <g.icon className="w-5 h-5 text-[#4ade80]" />
-              </div>
-              <div>
-                <div className="font-display font-bold text-white">{g.name}</div>
-                <div className="text-xs font-mono text-[#6EE7B7] mt-1">{g.note}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <GearList emptyLabel="Em breve divulgaremos todos os equipamentos do estúdio" />
       </div>
     </div>
   );

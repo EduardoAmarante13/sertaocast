@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { Calendar as CalendarIcon, Clock, Check, Mic2, Sparkles, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Mic2, Sparkles, Check, MessageCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { api, formatApiErrorDetail } from "../lib/api";
+import { api } from "../lib/api";
+
+const WHATSAPP_NUMBER = "5575981026377"; // +55 75 98102-6377
 
 const TIME_SLOTS = ["08:00", "09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
 const EQUIPMENT = [
-  { id: "mics_extra", label: "Mics extras (Shure SM7B)" },
+  { id: "mics_extra", label: "Mics extras" },
   { id: "cam_4k", label: "Câmeras 4K (video podcast)" },
   { id: "streaming", label: "Streaming ao vivo (RTMP)" },
   { id: "mixing", label: "Mixagem multi-track" },
-  { id: "lighting", label: "Iluminação cênica neon" },
+  { id: "lighting", label: "Iluminação cênica" },
 ];
 
 function nextDays(count = 21) {
@@ -35,76 +37,72 @@ export default function Booking() {
   const days = useMemo(() => nextDays(21), []);
   const [selectedDate, setSelectedDate] = useState(fmtDate(days[0]));
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [booked, setBooked] = useState([]);
   const [equipment, setEquipment] = useState([]);
   const [form, setForm] = useState({ name: "", email: "", phone: "", podcast_name: "", duration_hours: 2, notes: "" });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(null);
-
-  useEffect(() => {
-    api.get(`/bookings/availability`, { params: { date: selectedDate } })
-      .then((r) => setBooked(r.data.booked_slots || []))
-      .catch(() => setBooked([]));
-    setSelectedSlot(null);
-  }, [selectedDate]);
 
   const toggleEq = (id) => setEquipment((e) => (e.includes(id) ? e.filter((x) => x !== id) : [...e, id]));
 
   const submit = async () => {
-    if (!selectedSlot) { toast.error("Escolha um horário disponível"); return; }
-    if (!form.name || !form.email || !form.phone || !form.podcast_name) { toast.error("Preencha os campos obrigatórios"); return; }
+    if (!form.name || !form.podcast_name) {
+      toast.error("Preencha pelo menos seu nome e o nome do podcast");
+      return;
+    }
+    if (!selectedSlot) {
+      toast.error("Escolha um horário");
+      return;
+    }
     setLoading(true);
+
+    // save as lead (best-effort — don't block WhatsApp redirect if it fails)
     try {
-      const { data } = await api.post("/bookings", {
+      await api.post("/bookings", {
         ...form,
+        email: form.email || "nao-informado@sertaocast.com",
+        phone: form.phone || "nao-informado",
         date: selectedDate,
         time_slot: selectedSlot,
         duration_hours: Number(form.duration_hours),
         equipment,
       });
-      setSuccess(data);
-      toast.success("Reserva confirmada! 🎙️");
-    } catch (e) {
-      toast.error(formatApiErrorDetail(e.response?.data?.detail) || "Erro ao reservar");
-    } finally {
-      setLoading(false);
-    }
-  };
+    } catch (_) {}
 
-  if (success) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-20">
-        <div className="grain-card neon-border rounded-3xl p-10 text-center" data-testid="booking-success-message">
-          <div className="w-20 h-20 rounded-2xl mx-auto bg-gradient-to-br from-[#4ade80] to-[#06b6d4] flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(74,222,128,0.5)]">
-            <Check className="w-10 h-10 text-[#052e16]" strokeWidth={3} />
-          </div>
-          <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mb-3">// Reserva confirmada automaticamente</div>
-          <h2 className="font-display font-black text-3xl text-white mb-3">Cabine reservada, {success.name.split(" ")[0]}! 🎙️</h2>
-          <p className="text-[#A7F3D0] mb-6">Estamos te esperando no dia <b className="text-white">{new Date(success.date + 'T12:00').toLocaleDateString("pt-BR")}</b> às <b className="text-white">{success.time_slot}</b>.</p>
-          <div className="grid sm:grid-cols-3 gap-3 mt-8">
-            <InfoBox label="Podcast" value={success.podcast_name} />
-            <InfoBox label="Duração" value={`${success.duration_hours}h`} />
-            <InfoBox label="ID" value={success.id.slice(-6).toUpperCase()} />
-          </div>
-          <button onClick={() => { setSuccess(null); setSelectedSlot(null); setEquipment([]); setForm({ name: "", email: "", phone: "", podcast_name: "", duration_hours: 2, notes: "" }); }} className="mt-8 btn-ghost-neon px-6 py-3 rounded-xl" data-testid="booking-new-button">
-            Fazer nova reserva
-          </button>
-        </div>
-      </div>
-    );
-  }
+    const prettyDate = new Date(selectedDate + "T12:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    const equipLabels = equipment.map((id) => EQUIPMENT.find((x) => x.id === id)?.label).filter(Boolean);
+    const msg =
+`Olá! 👋 Quero reservar a cabine do SertãoCast.
+
+🎙️ *Dados da reserva*
+• Nome: ${form.name}
+• Podcast: ${form.podcast_name}
+• Data: ${prettyDate}
+• Horário: ${selectedSlot}
+• Duração: ${form.duration_hours}h
+${equipLabels.length ? "• Equipamentos extras: " + equipLabels.join(", ") : ""}
+${form.email ? "• Email: " + form.email : ""}
+${form.phone ? "• Telefone: " + form.phone : ""}
+${form.notes ? "\n📝 Observações: " + form.notes : ""}
+
+Pode confirmar?`;
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    toast.success("Abrindo WhatsApp...");
+    setLoading(false);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-16">
       <div className="mb-10">
-        <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mb-3">// Reserva instantânea</div>
+        <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mb-3">// Reserva via WhatsApp</div>
         <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-white">Agende sua <span className="neon-text">cabine</span></h1>
-        <p className="mt-4 text-[#A7F3D0] max-w-2xl">Escolha data, horário e equipamentos. Confirmação automática — sem espera.</p>
+        <p className="mt-4 text-[#A7F3D0] max-w-2xl">
+          Preencha os dados abaixo e finalize sua reserva diretamente no nosso WhatsApp. Resposta rápida, sem burocracia.
+        </p>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-6">
-          {/* Date */}
           <Section icon={CalendarIcon} title="1. Escolha a data">
             <div className="flex gap-2 overflow-x-auto scrollbar-neon pb-2" data-testid="booking-date-picker">
               {days.map((d) => {
@@ -128,22 +126,17 @@ export default function Booking() {
             </div>
           </Section>
 
-          {/* Time */}
           <Section icon={Clock} title="2. Selecione o horário">
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
               {TIME_SLOTS.map((t) => {
-                const isBooked = booked.includes(t);
                 const active = selectedSlot === t;
                 return (
                   <button
                     key={t}
-                    onClick={() => !isBooked && setSelectedSlot(t)}
-                    disabled={isBooked}
+                    onClick={() => setSelectedSlot(t)}
                     data-testid={`booking-time-slot-${t.replace(":", "")}`}
                     className={`py-3 rounded-lg font-mono text-sm border transition-all ${
-                      isBooked
-                        ? "bg-[#141C15]/50 text-[#34D399]/40 border-[rgba(74,222,128,0.1)] line-through cursor-not-allowed"
-                        : active
+                      active
                         ? "bg-[#4ade80] text-[#052e16] border-[#4ade80] shadow-[0_0_20px_rgba(74,222,128,0.4)]"
                         : "bg-[#0B100C] text-[#A7F3D0] border-[rgba(74,222,128,0.25)] hover:border-[#4ade80]"
                     }`}
@@ -155,8 +148,7 @@ export default function Booking() {
             </div>
           </Section>
 
-          {/* Equipment */}
-          <Section icon={Mic2} title="3. Equipamentos extras">
+          <Section icon={Mic2} title="3. Equipamentos extras (opcional)">
             <div className="grid sm:grid-cols-2 gap-2">
               {EQUIPMENT.map((e) => {
                 const active = equipment.includes(e.id);
@@ -179,13 +171,12 @@ export default function Booking() {
             </div>
           </Section>
 
-          {/* Contact */}
           <Section icon={Sparkles} title="4. Seus dados">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Nome completo *" testid="booking-name-input" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
-              <Field label="Email *" type="email" testid="booking-email-input" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
-              <Field label="Telefone *" testid="booking-phone-input" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               <Field label="Nome do podcast *" testid="booking-podcast-input" value={form.podcast_name} onChange={(v) => setForm({ ...form, podcast_name: v })} />
+              <Field label="Email (opcional)" type="email" testid="booking-email-input" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+              <Field label="Telefone (opcional)" testid="booking-phone-input" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
               <div>
                 <div className="text-xs font-mono uppercase tracking-widest text-[#6EE7B7] mb-2">Duração (horas)</div>
                 <select
@@ -212,7 +203,6 @@ export default function Booking() {
           </Section>
         </div>
 
-        {/* Summary */}
         <div className="lg:col-span-4">
           <div className="lg:sticky lg:top-24 grain-card neon-border rounded-2xl p-6">
             <div className="font-mono text-xs uppercase tracking-widest text-[#4ade80] mb-4">// Resumo</div>
@@ -221,19 +211,17 @@ export default function Booking() {
             <SummaryRow label="Duração" value={`${form.duration_hours}h`} />
             <SummaryRow label="Equipamentos" value={equipment.length ? `${equipment.length} extras` : "Padrão"} />
             <div className="border-t border-[rgba(74,222,128,0.15)] my-4" />
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-sm text-[#A7F3D0]">Total</span>
-              <span className="font-display font-black text-2xl neon-text">Grátis*</span>
-            </div>
             <button
               onClick={submit}
               disabled={loading}
               data-testid="booking-submit-button"
               className="btn-neon w-full py-4 rounded-xl inline-flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-5 h-5" /> Confirmar Reserva</>}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><MessageCircle className="w-5 h-5" /> Finalizar no WhatsApp</>}
             </button>
-            <div className="text-[10px] text-center font-mono text-[#6EE7B7] mt-4">*Demonstração — aprovação automática</div>
+            <div className="text-[10px] text-center font-mono text-[#6EE7B7] mt-4">
+              Você será redirecionado para <b className="text-white">+55 75 98102-6377</b>
+            </div>
           </div>
         </div>
       </div>
@@ -275,15 +263,6 @@ function SummaryRow({ label, value }) {
     <div className="flex items-center justify-between py-2">
       <span className="text-xs font-mono uppercase text-[#6EE7B7]">{label}</span>
       <span className="text-sm text-white font-medium text-right">{value}</span>
-    </div>
-  );
-}
-
-function InfoBox({ label, value }) {
-  return (
-    <div className="neon-border rounded-xl py-3 px-4 bg-[#0B100C]">
-      <div className="font-mono text-[10px] uppercase text-[#6EE7B7]">{label}</div>
-      <div className="text-white font-bold text-sm mt-1">{value}</div>
     </div>
   );
 }

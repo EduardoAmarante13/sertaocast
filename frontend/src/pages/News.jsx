@@ -108,7 +108,7 @@ export default function News() {
           </div>
           {items.length > 3 && (
             <div className="my-10">
-              <AdSlot format="fluid" layout="in-feed" layoutKey="-6t+ed+2i-1n-4w" testid="ad-news-in-feed" />
+              <AdSlot name="news-in-feed" format="fluid" layout="in-feed" layoutKey="-6t+ed+2i-1n-4w" testid="ad-news-in-feed" />
             </div>
           )}
           {items.length > 3 && (
@@ -162,7 +162,7 @@ export default function News() {
             </div>
           )}
           <div className="mt-14">
-            <AdSlot testid="ad-news-bottom" />
+            <AdSlot name="news-bottom" testid="ad-news-bottom" />
           </div>
         </>
       )}

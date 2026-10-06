@@ -22,10 +22,10 @@ export default function Footer() {
         <div>
           <div className="font-display font-bold text-sm text-white mb-4 uppercase tracking-wider">Estúdio</div>
           <ul className="space-y-2 text-sm text-[#A7F3D0]">
-            <li>Microfones Shure SM7B</li>
-            <li>Rødecaster Pro II</li>
-            <li>Câmeras Sony Alpha 4K</li>
-            <li>Iluminação neon customizada</li>
+            <li>Cabine com iluminação cênica</li>
+            <li>Reserva via WhatsApp</li>
+            <li>Streaming ao vivo (RTMP)</li>
+            <li>Equipamentos sob consulta</li>
           </ul>
         </div>
         <div>

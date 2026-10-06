@@ -142,6 +142,29 @@ class News(NewsCreate):
     published_at: str
 
 
+class GearItem(BaseModel):
+    name: str
+    note: Optional[str] = ""
+    icon: str = "mic2"  # mic2 | radio | camera | sliders | music | sparkles | zap
+
+
+class Gear(GearItem):
+    id: str
+    created_at: str
+
+
+class BannerUpsert(BaseModel):
+    slot_id: Optional[str] = ""
+    enabled: bool = True
+
+
+class Banner(BaseModel):
+    name: str
+    slot_id: Optional[str] = ""
+    enabled: bool = True
+    description: Optional[str] = ""
+
+
 # ---------- Auth ----------
 @api_router.post("/auth/login")
 async def login(body: LoginRequest):
@@ -328,6 +351,70 @@ async def list_contact(admin=Depends(get_current_admin)):
     ]
 
 
+# ---------- Gear (studio equipment) ----------
+@api_router.get("/gear", response_model=List[Gear])
+async def list_gear():
+    docs = await db.gear.find().sort("created_at", 1).to_list(200)
+    return [
+        Gear(
+            id=str(d["_id"]),
+            name=d["name"],
+            note=d.get("note", ""),
+            icon=d.get("icon", "mic2"),
+            created_at=d["created_at"],
+        )
+        for d in docs
+    ]
+
+
+@api_router.post("/gear", response_model=Gear)
+async def create_gear(body: GearItem, admin=Depends(get_current_admin)):
+    doc = {**body.model_dump(), "created_at": datetime.now(timezone.utc).isoformat()}
+    result = await db.gear.insert_one(doc)
+    return Gear(id=str(result.inserted_id), **{k: doc[k] for k in doc if k != "_id"})
+
+
+@api_router.delete("/gear/{gear_id}")
+async def delete_gear(gear_id: str, admin=Depends(get_current_admin)):
+    res = await db.gear.delete_one({"_id": ObjectId(gear_id)})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Equipamento não encontrado")
+    return {"success": True}
+
+
+# ---------- Banners (ad slots) ----------
+@api_router.get("/banners", response_model=List[Banner])
+async def list_banners():
+    docs = await db.banners.find().to_list(50)
+    return [
+        Banner(
+            name=d["name"],
+            slot_id=d.get("slot_id", ""),
+            enabled=d.get("enabled", True),
+            description=d.get("description", ""),
+        )
+        for d in docs
+    ]
+
+
+@api_router.put("/banners/{name}", response_model=Banner)
+async def upsert_banner(name: str, body: BannerUpsert, admin=Depends(get_current_admin)):
+    existing = await db.banners.find_one({"name": name})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Placement não encontrado")
+    await db.banners.update_one(
+        {"name": name},
+        {"$set": {"slot_id": body.slot_id or "", "enabled": bool(body.enabled)}},
+    )
+    doc = await db.banners.find_one({"name": name})
+    return Banner(
+        name=doc["name"],
+        slot_id=doc.get("slot_id", ""),
+        enabled=doc.get("enabled", True),
+        description=doc.get("description", ""),
+    )
+
+
 # ---------- News ----------
 @api_router.get("/news", response_model=List[News])
 async def list_news(category: Optional[str] = None, limit: int = 100):
@@ -376,6 +463,7 @@ async def stats(admin=Depends(get_current_admin)):
     cancelled = await db.bookings.count_documents({"status": "cancelled"})
     total_messages = await db.contact_messages.count_documents({})
     total_news = await db.news.count_documents({})
+    total_gear = await db.gear.count_documents({})
     plays_agg = await db.episodes.aggregate(
         [{"$group": {"_id": None, "total": {"$sum": "$plays"}}}]
     ).to_list(1)
@@ -386,6 +474,7 @@ async def stats(admin=Depends(get_current_admin)):
         "cancelled_bookings": cancelled,
         "total_messages": total_messages,
         "total_news": total_news,
+        "total_gear": total_gear,
         "total_plays": total_plays,
     }
 
@@ -454,6 +543,15 @@ SEED_EPISODES = [
 ]
 
 
+SEED_BANNERS = [
+    {"name": "home-in-article", "description": "Home — abaixo dos últimos episódios"},
+    {"name": "episodes-mid", "description": "Episódios — entre os cards"},
+    {"name": "news-in-feed", "description": "Notícias — entre os cards (maior CPM)"},
+    {"name": "news-bottom", "description": "Notícias — rodapé da listagem"},
+    {"name": "about-mid", "description": "Sobre — entre hosts e setup"},
+]
+
+
 async def seed_data():
     admin_email = os.environ["ADMIN_EMAIL"].lower().strip()
     admin_password = os.environ["ADMIN_PASSWORD"]
@@ -474,18 +572,12 @@ async def seed_data():
             {"$set": {"password_hash": hash_password(admin_password)}},
         )
 
-    if await db.episodes.count_documents({}) == 0:
-        for i, ep in enumerate(SEED_EPISODES, start=1):
-            await db.episodes.insert_one(
-                {
-                    **ep,
-                    "episode_number": i,
-                    "audio_url": "",
-                    "published_at": (
-                        datetime.now(timezone.utc) - timedelta(days=(len(SEED_EPISODES) - i) * 7)
-                    ).isoformat(),
-                }
-            )
+    for b in SEED_BANNERS:
+        await db.banners.update_one(
+            {"name": b["name"]},
+            {"$setOnInsert": {"name": b["name"], "slot_id": "", "enabled": True, "description": b["description"]}},
+            upsert=True,
+        )
 
 
 @app.on_event("startup")
